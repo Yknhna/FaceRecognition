@@ -3,29 +3,36 @@ import numpy as np
 import face_recognition
 import os
 
-white_list_path = 'White_List' # path to the white list file
-white_list = []
-white_list_images = os.listdir(white_list_path) # get all images in the white list directory
+white_list_path: str = 'Samples' # path to the white list file
+white_list_images: list[str] = os.listdir(white_list_path) # get all images in the white list directory
 
+white_list: list[tuple] = []
+encoded_faces: list = []
 
 # whitelist : [elon must.jpg, elon_musk2.jpg]
 # splittext -> elon_must
 
 for person in white_list_images:
-    img = cv2.imread(f'{white_list_path}/{person}')
+    print(f'{white_list_path}/{person}')
+    img = face_recognition.load_image_file(f'{white_list_path}/{person}') # 'eg. White_List/person.jpg'
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) # Converts BGR to RGB
     white_list.append((img, os.path.splitext(person)[0]))
 
-def encode_faces(white_list_images):
-    encode_faces = []
-    
-    for img in white_list_images:
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        face_encodings = face_recognition.face_encodings(img)
+
+def encode_faces(white_lists: list) -> None:
+    """ Encodes each white listed person's face and stores them in a list, encoded_faces.
+    Returns None
+    """
+    for person in white_lists:
+        image = person[0]
+        face_encodings = face_recognition.face_encodings(image)
 
         if face_encodings:
-            encode_faces.append(face_encodings[0])
+            encoded_faces.append(face_encodings[0])
         else:
-            encode_faces.append(None)  # Append None if no face is found
+            encoded_faces.append(None)  # Append None if no face is found
+
+
 
 def add_to_white_list(person):
     global white_list_images
@@ -39,6 +46,7 @@ def add_to_white_list(person):
     else:
         print(f"No face found in {person}.")
 
+
 def run_camera():
     captured_faces = cv2 .VideoCapture(0)
 
@@ -50,4 +58,9 @@ def run_camera():
         face_in_frame = face_recognition.face_locations(img_small)
         encode_frame = face_recognition.face_encodings(img_small, face_in_frame)
 
-        
+
+if __name__ == '__main__':
+    encode_faces(white_list)
+    for item in white_list:
+        print(item)
+
