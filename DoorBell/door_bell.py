@@ -13,8 +13,7 @@ encoded_faces: list = []
 # splittext -> elon_must
 
 for person in white_list_images:
-    print(f'{white_list_path}/{person}')
-    img = face_recognition.load_image_file(f'{white_list_path}/{person}') # 'eg. White_List/person.jpg'
+    img = face_recognition.load_image_file('Samples/donald_trump2.jpg') # 'eg. White_List/person.jpg'
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) # Converts BGR to RGB
     white_list.append((img, os.path.splitext(person)[0]))
 
