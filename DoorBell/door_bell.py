@@ -2,46 +2,18 @@ import cv2
 import numpy as np
 import face_recognition
 import os
+from white_list import WhiteList
 
-white_list_path = 'White_List'  # path to the white list file
-white_list = []
-white_list_images = os.listdir(white_list_path)  # get all images in the white list directory
+white_list = None
+encoded_faces = None
+white_list_images = None
 
-# whitelist : [elon must.jpg, elon_musk2.jpg]
-# splittext -> elon_must
+def setup_camera():
+    white_list = WhiteList('DoorBell/Samples')
+    encoded_faces = white_list.get_encoded_faces()
+    white_list_images = white_list.get_white_lists()
 
-for person in white_list_images:
-    img = cv2.imread(f'{white_list_path}/{person}')
-    white_list.append((img, os.path.splitext(person)[0]))
-
-
-def encode_faces(white_list_images):
-    encode_faces = []
-
-    for img in white_list_images:
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        face_encodings = face_recognition.face_encodings(img)
-
-        if face_encodings:
-            encode_faces.append(face_encodings[0])
-        else:
-            encode_faces.append(None)  # Append None if no face is found
-
-
-def add_to_white_list(person):
-    global white_list_images
-    img = face_recognition.load_image_file(person)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    face_encodings = face_recognition.face_encodings(img)
-
-    if face_encodings:
-        white_list_images.append(face_encodings[0])
-        print(f"Added {person} to white list.")
-    else:
-        print(f"No face found in {person}.")
-
-
-def run_camera():
+def run_door_bell():
     captured_faces = cv2.VideoCapture(0)
 
     while True:
@@ -51,4 +23,45 @@ def run_camera():
 
         face_in_frame = face_recognition.face_locations(img_small)
         encode_frame = face_recognition.face_encodings(img_small, face_in_frame)
+
+        for encode_face, face_location in zip(encode_frame, face_in_frame):
+            matches = face_recognition.compare_faces(encoded_faces, encode_face)
+            face_distance = face_recognition.face_distance(encoded_faces, encode_face)
+
+            match_index = np.argmin(face_distance)
+
+            if matches[match_index]:
+                name = white_list_images[match_index][1]
+                y1, x2, y2, x1 = face_location
+                y1 *= 4
+                x2 *= 4
+                y2 *= 4
+                x1 *= 4
+
+                cv2.rectangle(img, (x1, y1), (x2, y2), (255, 255, 0), 2)
+                cv2.putText(img, name, (x1 + 6, y1 - 6), cv2.FONT_HERSHEY_PLAIN,
+                            1.5, (255, 255, 255), 2)
+
+        # if the face is not in the white list, draw a rectangle around the face and label it as "Unknown"
+        for face_location in face_in_frame:
+            y1, x2, y2, x1 = face_location
+            y1 *= 4
+            x2 *= 4
+            y2 *= 4
+            x1 *= 4
+
+            cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
+            cv2.putText(img, 'Unknown', (x1 + 6, y1 - 6), cv2.FONT_HERSHEY_PLAIN,
+                        1.5, (255, 255, 255), 2)
+            
+
+        cv2.imshow('Door Bell', img)
+
+        # q is temp key to exit the camera (for testing purposes)
+        # this will be replaced with a end call button in the future
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    captured_faces.release()
+    cv2.destroyAllWindows()
 
