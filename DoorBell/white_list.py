@@ -8,17 +8,17 @@ class WhiteList:
 
     path: str
 
-    white_list_images: list[str]
+    white_list_names: list[str]
     white_list: list[tuple]
 
     _encoded_faces: list
 
     def __init__(self, images_path: str) -> None:
         self.path = images_path
-        self.white_list_images = os.listdir(images_path)
+        self.white_list_names = os.listdir(images_path)
 
         self.white_list = []
-        for person in self.white_list_images:
+        for person in self.white_list_names:
             img = cv2.imread(f'{self.path}/{person}')
             # Convert BGR to RGB
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -42,16 +42,22 @@ class WhiteList:
         return True
 
     def get_white_lists(self) -> list[tuple]:
-        """ Returns list of white listed person's faces."""
+        """ Returns list of white listed person's faces as a cv2 image format."""
         return self.white_list
 
     def get_encoded_faces(self) -> list:
         """ Returns list of encoded faces."""
         return self._encoded_faces
 
+    def get_path(self) -> str:
+        return self.path
+
+    def get_white_list_names(self) -> list[str]:
+        return self.white_list_names
+
     def add_white_list(self, img, person) -> bool:
         """ Adds <person> to the whitelist, which the person's image has been already
-        added to the directory, <self.path>.
+        added to the directory, <self.path>.path
         Returns True iff encoded_face is not None i.e. it has been successfully encoded.
         """
         self.white_list.append((img, os.path.splitext(person)[0]))
