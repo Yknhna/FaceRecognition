@@ -49,16 +49,14 @@ class WhiteList:
         """ Returns list of encoded faces."""
         return self._encoded_faces
 
-    def add_white_list(self, person: str) -> bool:
+    def add_white_list(self, img, person) -> bool:
         """ Adds <person> to the whitelist, which the person's image has been already
         added to the directory, <self.path>.
         Returns True iff encoded_face is not None i.e. it has been successfully encoded.
         """
-        img = cv2.imread(f'{self.path}/{person}')
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         self.white_list.append((img, os.path.splitext(person)[0]))
-
         encoded_face = face_recognition.face_encodings(img)
+
         if encoded_face:
             self._encoded_faces.append(encoded_face[0])
             return True

@@ -6,12 +6,26 @@ from white_list import WhiteList
 
 class DoorBell:
     def __init__(self):
-        white_list = WhiteList('DoorBell/Samples')
-        encoded_faces = white_list.get_encoded_faces()
-        white_list_images = white_list.get_white_lists()
+        self.w_list = WhiteList('DoorBell/White_List')
+        self.encoded_faces = self.w_list.get_encoded_faces()
+        self.w_list_images = self.w_list.get_white_lists()
 
     def view_white_list(self):
-        print("White List:")
+        self.w_list.get_white_lists()
+
+    def add_sample(self):
+        path = 'DoorBell/Samples'
+        w_list_image = os.listdir(path)
+
+        for person in w_list_image:
+            img = cv2.imread(f'{path}/{person}')
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            self.w_list.add_white_list(img, person)
+            print(f"Added {person} to white list.")
+        
+        self.encoded_faces = self.w_list.get_encoded_faces()
+        self.w_list_images = self.w_list.get_white_lists()
+        self.view_white_list()
 
     def run_door_bell(self):
         cam = cv2.VideoCapture(0)
@@ -35,13 +49,17 @@ class DoorBell:
             encode_frame = face_recognition.face_encodings(frame_small, face_loc)
 
             for encode_face, face_location in zip(encode_frame, face_loc):
-                matches = face_recognition.compare_faces(encoded_faces, encode_face)
-                face_distance = face_recognition.face_distance(encoded_faces, encode_face)
+                matches = face_recognition.compare_faces(self.encoded_faces, encode_face)
+                face_distance = face_recognition.face_distance(self.encoded_faces, encode_face)
+
+                # print(f"Face distance: {face_distance}")
 
                 match_index = np.argmin(face_distance)
 
                 if matches[match_index]:
-                    name = white_list_images[match_index][1]
+                    name = self.w_list_images[match_index][1]
+                    print(f"Recognized: {name}")
+
                     y1, x2, y2, x1 = face_location
                     y1 *= 4
                     x2 *= 4
@@ -51,19 +69,16 @@ class DoorBell:
                     cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 255, 0), 2)
                     cv2.putText(frame, name, (x1 + 6, y1 - 6), cv2.FONT_HERSHEY_PLAIN,
                                 1.5, (255, 255, 255), 2)
+                else:
+                    y1, x2, y2, x1 = face_location
+                    y1 *= 4
+                    x2 *= 4
+                    y2 *= 4
+                    x1 *= 4
 
-            # if the face is not in the white list, draw a rectangle around the face and label it as "Unknown"
-            for face_location in face_loc:
-                y1, x2, y2, x1 = face_location
-                y1 *= 4
-                x2 *= 4
-                y2 *= 4
-                x1 *= 4
-
-                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
-                cv2.putText(frame, 'Unknown', (x1 + 6, y1 - 6), cv2.FONT_HERSHEY_PLAIN,
-                            1.5, (255, 255, 255), 2)
-                
+                    cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
+                    cv2.putText(frame, "Unknown", (x1 + 6, y1 - 6), cv2.FONT_HERSHEY_PLAIN,
+                                1.5, (255, 255, 255), 2)
 
             cv2.imshow('Door Bell', frame)
             
