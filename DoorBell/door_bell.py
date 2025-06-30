@@ -7,6 +7,8 @@ from datetime import datetime
 
 
 class DoorBell:
+    # TODO: Allow parameters such as a path to WL.
+    #  Add a method for adding a whitelist.
     def __init__(self):
         self.w_list = WhiteList('White_List')
         self.encoded_faces = self.w_list.get_encoded_faces()
@@ -31,12 +33,13 @@ class DoorBell:
 
     def mark_attendance(self, name):
         """Just a Test method"""
+        # TODO: Allow writing duplicate only after 5 minutes of the last one written.
         path = 'Attendance/Attendance.csv'
         with open(path, 'r+') as f:
             name_list = []
+            attended_list = f.readlines()
             # This is for avoiding duplicates, but leave it commented out for now
             # since we might want duplicates
-            # attended_list = f.readlines()
             # for line in attended_list:
             #     entry = line.split(',')
             #     name_list.append(entry[0])
@@ -47,6 +50,7 @@ class DoorBell:
 
 
     def run_door_bell(self):
+        # TODO: Make sub-function / helper functions for easier management
         cam = cv2.VideoCapture(0)
 
         if not cam.isOpened():
