@@ -3,10 +3,12 @@ import numpy as np
 import face_recognition
 import os
 from white_list import WhiteList
+from datetime import datetime
+
 
 class DoorBell:
     def __init__(self):
-        self.w_list = WhiteList('DoorBell/White_List')
+        self.w_list = WhiteList('White_List')
         self.encoded_faces = self.w_list.get_encoded_faces()
         self.w_list_images = self.w_list.get_white_lists()
 
@@ -14,7 +16,7 @@ class DoorBell:
         self.w_list.get_white_lists()
 
     def add_sample(self):
-        path = 'DoorBell/Samples'
+        path = 'Samples'
         w_list_image = os.listdir(path)
 
         for person in w_list_image:
@@ -26,6 +28,23 @@ class DoorBell:
         self.encoded_faces = self.w_list.get_encoded_faces()
         self.w_list_images = self.w_list.get_white_lists()
         self.view_white_list()
+
+    def mark_attendance(self, name):
+        """Just a Test method"""
+        path = 'Attendance/Attendance.csv'
+        with open(path, 'r+') as f:
+            name_list = []
+            # This is for avoiding duplicates, but leave it commented out for now
+            # since we might want duplicates
+            # attended_list = f.readlines()
+            # for line in attended_list:
+            #     entry = line.split(',')
+            #     name_list.append(entry[0])
+            # if name not in name_list:
+            now = datetime.now()
+            date_string = now.strftime("%d/%m/%Y %H:%M:%S")
+            f.writelines(f'\n{name},{date_string}')
+
 
     def run_door_bell(self):
         cam = cv2.VideoCapture(0)
@@ -69,6 +88,7 @@ class DoorBell:
                     cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 255, 0), 2)
                     cv2.putText(frame, name, (x1 + 6, y1 - 6), cv2.FONT_HERSHEY_PLAIN,
                                 1.5, (255, 255, 255), 2)
+                    self.mark_attendance(name)
                 else:
                     y1, x2, y2, x1 = face_location
                     y1 *= 4
