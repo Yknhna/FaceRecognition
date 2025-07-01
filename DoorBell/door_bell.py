@@ -36,17 +36,27 @@ class DoorBell:
         # TODO: Allow writing duplicate only after 5 minutes of the last one written.
         path = 'Attendance/Attendance.csv'
         with open(path, 'r+') as f:
-            name_list = []
             attended_list = f.readlines()
-            # This is for avoiding duplicates, but leave it commented out for now
-            # since we might want duplicates
-            # for line in attended_list:
-            #     entry = line.split(',')
-            #     name_list.append(entry[0])
-            # if name not in name_list:
+
+            # This avoids duplicates within 1 minute
+            for i in range(len(attended_list) - 1, -1, -1):
+                entry = attended_list[i].split(',')
+                existing_name = entry[0]
+                if existing_name.lower() == name.lower():
+                    written_date_time = datetime.strptime(entry[1], '%d/%m/%Y %H:%M:%S')
+                    print('written date: ' + written_date_time.strftime('%d/%m/%Y %H:%M:%S'))
+                    now = datetime.now()
+                    print('difference: ' + str((now - written_date_time).total_seconds()))
+                    if (now - written_date_time).total_seconds() >= 60: # 60 sec (1 min)
+                        now = now.strftime('%d/%m/%Y %H:%M:%S')
+                        f.writelines(f'\n{name},{now}')
+                        return True
+                    return False
+
             now = datetime.now()
             date_string = now.strftime("%d/%m/%Y %H:%M:%S")
             f.writelines(f'\n{name},{date_string}')
+            return True
 
 
     def run_door_bell(self):
@@ -92,7 +102,7 @@ class DoorBell:
                     cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 255, 0), 2)
                     cv2.putText(frame, name, (x1 + 6, y1 - 6), cv2.FONT_HERSHEY_PLAIN,
                                 1.5, (255, 255, 255), 2)
-                    self.mark_attendance(name)
+                    print('Marking Attentance: ' + str(self.mark_attendance(name)))
                 else:
                     y1, x2, y2, x1 = face_location
                     y1 *= 4
