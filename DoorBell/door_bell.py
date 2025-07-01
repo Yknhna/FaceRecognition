@@ -9,15 +9,15 @@ from datetime import datetime
 class DoorBell:
     # TODO: Allow parameters such as a path to WL.
     #  Add a method for adding a whitelist.
-    def __init__(self):
+    def __init__(self) -> None:
         self.w_list = WhiteList('White_List')
         self.encoded_faces = self.w_list.get_encoded_faces()
         self.w_list_images = self.w_list.get_white_lists()
 
-    def view_white_list(self):
-        self.w_list.get_white_lists()
+    def view_white_list(self) -> list[tuple]:
+        return self.w_list.get_white_lists()
 
-    def add_sample(self):
+    def add_sample(self) -> None:
         path = 'Samples'
         w_list_image = os.listdir(path)
 
@@ -31,8 +31,8 @@ class DoorBell:
         self.w_list_images = self.w_list.get_white_lists()
         self.view_white_list()
 
-    def mark_attendance(self, name):
-        """Just a Test method"""
+    def mark_attendance(self, name: str) -> bool:
+        """Just a Test method for now"""
         # TODO: Allow writing duplicate only after 5 minutes of the last one written.
         path = 'Attendance/Attendance.csv'
         with open(path, 'r+') as f:
@@ -59,7 +59,7 @@ class DoorBell:
             return True
 
 
-    def run_door_bell(self):
+    def run_door_bell(self) -> None:
         # TODO: Make sub-function / helper functions for easier management
         cam = cv2.VideoCapture(0)
 
