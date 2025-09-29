@@ -4,13 +4,13 @@ import face_recognition
 import face_recognition_models
 
 # Load images first, convert their BGR to RGB
-img_elon = face_recognition.load_image_file('images/elon_musk1.jpg')
+img_elon = face_recognition.load_image_file('DoorBell/Samples/elon_musk1.jpg')
 img_elon = cv2.cvtColor(img_elon, cv2.COLOR_BGR2RGB)
 
-img_test_elon = face_recognition.load_image_file('images/elon_musk2.jpg')
+img_test_elon = face_recognition.load_image_file('DoorBell/Samples/elon_musk2.jpg')
 img_test_elon = cv2.cvtColor(img_test_elon, cv2.COLOR_BGR2RGB)
 
-img_test_2 = face_recognition.load_image_file('images/donald_trump1.jpg')
+img_test_2 = face_recognition.load_image_file('DoorBell/Samples/donald_trump1.jpg')
 img_test_2 = cv2.cvtColor(img_test_2, cv2.COLOR_BGR2RGB)
 
 
