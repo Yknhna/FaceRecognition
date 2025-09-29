@@ -10,7 +10,7 @@ class DoorBell:
     # TODO: Allow parameters such as a path to WL.
     #  Add a method for adding a whitelist.
     def __init__(self) -> None:
-        self.w_list = WhiteList('White_List')
+        self.w_list = WhiteList('Samples')
         self.encoded_faces = self.w_list.get_encoded_faces()
         self.w_list_images = self.w_list.get_white_lists()
 
